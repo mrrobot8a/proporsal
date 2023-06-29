@@ -5,6 +5,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.projectproposal.entity.Sede;
 import com.example.projectproposal.service.ISedeService;
 
+import jakarta.validation.Valid;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.naming.Binding;
 
 @CrossOrigin({ "http://localhost:4200" }) // cors origin perimitir concectar dos herrramientas en diferentes dominios ,
                                           // en este caso el frontend con el backend
@@ -30,7 +36,7 @@ import java.util.Map;
 public class SedeRestController {
 
    @Autowired // va a buscar el primer candidato , una clase concreta que implementación esta
-              // interface y la va a inyectar
+              // interface y la va a inyectar la cual es sedeserviceimpl
    private ISedeService sedeService;
 
    @GetMapping("/sedes")
@@ -63,11 +69,23 @@ public class SedeRestController {
    }
 
    @PostMapping("/sedes") // crea el endpoint
-   public ResponseEntity<?> create(@RequestBody Sede sede) {
+   public ResponseEntity<?> create(@Valid @RequestBody Sede sede, BindingResult result) {
 
       Sede sedeNew = null;
       Map<String, Object> response = new HashMap<>(); // instancia de hashmap para crear un map para el manejo de
                                                       // errores
+
+      if (result.hasErrors()) {
+
+         // Se crea una lista de errores (errores que vienen del front en formato json)
+         List<String> errors = result.getFieldErrors().stream().map(
+               fieldError -> "El campo '" + fieldError.getField() + "' " + fieldError.getDefaultMessage())
+               .collect(Collectors.toList());
+
+         response.put("errors", errors);
+         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+
+      }
       // manejo de errorees en la consulta en la base de datos
       try {
          sedeNew = sedeService.save(sede);// metodo para guardar en la base datos
@@ -85,13 +103,27 @@ public class SedeRestController {
    }
 
    @PutMapping("/sedes/{id}")
-   public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody Sede sede) {
-      Sede sedeActual = sedeService.findById(id); // atributos
+   public ResponseEntity<?> update(@PathVariable("id") Long id, @Valid @RequestBody Sede sede, BindingResult result) {
+      Sede sedeActual = sedeService.findById(id); // se realiza la consulta para encontrar la sede que esta en la base de datos
 
       Sede sedeUpdate = null;
 
       Map<String, Object> response = new HashMap<>(); // instancia de hashmap para crear un map para el manejo de
                                                       // errores
+      // valida si encontro algun error de las validaciones que anotamos en la clase entity
+      if (result.hasErrors()) {
+
+         // Se crea una lista de errores (errores que vienen del front en formato json)
+         List<String> errors = result.getFieldErrors().stream().map(
+               fieldError -> "El campo '" + fieldError.getField() + "' " + fieldError.getDefaultMessage())
+               .collect(Collectors.toList());
+
+         response.put("errors", errors);
+         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+
+      }
+    
+      // validacion para saber si encontro la sede en la base de datos
       if (sedeActual == null) {
 
          response.put("mensaje", "El cliente ID:".concat(id.toString().concat(" - no existe en la base de datosQ")));
@@ -99,15 +131,17 @@ public class SedeRestController {
       }
 
       try {
-
+   // se agrega los nuevos datos ala sede que se trajo de la base de datos
          sedeActual.setNombreSede(sede.getNombreSede());
          sedeActual.setDireccion(sede.getDireccion());
          sedeActual.setTelefono(sede.getTelefono());
          sedeActual.setEmail(sede.getEmail());
+         // metodo para guardar en la base datos
          sedeUpdate = sedeService.save(sedeActual);
 
       } catch (DataAccessException e) {
          // TODO: handle exception
+         //manejo de exception de la base de datos
 
          response.put("mensaje", "Error al realizar la actualizacion en la base de datos");
          response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -116,26 +150,29 @@ public class SedeRestController {
 
       response.put("mensaje", "El cliente ha sido actualizado con exito!");
       response.put("cliente", sedeUpdate);
-      return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);// se utiliza el mismo metodo que en
+      return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+      
+      
+      //el metodo sava de la clase crudRespository
+      // se utiliza el mismo metodo que en
                                                                                    // el crear para actualizar esto por
                                                                                    // detra
       // se entiendo como merger , si el metodo trae un id este lo actuliza de lo
       // contraio crear el objeto en la base de datos
    }
 
-   
    @DeleteMapping("/sedes/{id}")
    public ResponseEntity<?> delete(@PathVariable Long id) {
       Sede sedeActual = sedeService.findById(id);
       Map<String, Object> response = new HashMap<>();
-      
-      if (sedeActual == null) {
 
+      if (sedeActual == null) {
          response.put("mensaje", "El cliente ID:".concat(id.toString().concat(" - no existe en la base de datos")));
          return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
       }
 
       try {
+         //metodo para eleminar una sede de la base de datos
          sedeService.delete(id);
       } catch (EmptyResultDataAccessException e) {
          response.put("mensaje", "La sede con el ID " + id + " no existe");
