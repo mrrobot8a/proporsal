@@ -8,4 +8,12 @@ public interface ISedeService {
     
     //metodo para consultar todas las sedes
     public List<Sede> findAll();
+    //metodo para consultar por Id
+    public Sede findById(Long id);
+    //metodo para guardar 
+    public Sede save(Sede sede);
+    //metodo para borrar
+    public void delete(Long id);
+
+
 }
