@@ -40,7 +40,7 @@ import lombok.NoArgsConstructor;
     @Column(name = "telefono", nullable = false, length = 20)
     private String telefono ;
 
-    @Column(name = "email", nullable = false, length = 20)
+    @Column(name = "email", nullable = false, length = 20 , unique = true)
     private String email ;
 
     @Column(name="create_at")
