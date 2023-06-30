@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.projectproposal.entity.Sede;
@@ -26,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.naming.Binding;
 
 @CrossOrigin({ "http://localhost:4200" }) // cors origin perimitir concectar dos herrramientas en diferentes dominios ,
                                           // en este caso el frontend con el backend
@@ -104,13 +101,15 @@ public class SedeRestController {
 
    @PutMapping("/sedes/{id}")
    public ResponseEntity<?> update(@PathVariable("id") Long id, @Valid @RequestBody Sede sede, BindingResult result) {
-      Sede sedeActual = sedeService.findById(id); // se realiza la consulta para encontrar la sede que esta en la base de datos
+      // Sede sedeActual = sedeService.findById(id); // se realiza la consulta para
+      // encontrar la sede que esta en la base de datos
 
       Sede sedeUpdate = null;
 
       Map<String, Object> response = new HashMap<>(); // instancia de hashmap para crear un map para el manejo de
                                                       // errores
-      // valida si encontro algun error de las validaciones que anotamos en la clase entity
+      // valida si encontro algun error de las validaciones que anotamos en la clase
+      // entity
       if (result.hasErrors()) {
 
          // Se crea una lista de errores (errores que vienen del front en formato json)
@@ -122,26 +121,28 @@ public class SedeRestController {
          return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 
       }
-    
-      // validacion para saber si encontro la sede en la base de datos
-      if (sedeActual == null) {
-
-         response.put("mensaje", "El cliente ID:".concat(id.toString().concat(" - no existe en la base de datosQ")));
-         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_MODIFIED);
-      }
 
       try {
-   // se agrega los nuevos datos ala sede que se trajo de la base de datos
-         sedeActual.setNombreSede(sede.getNombreSede());
-         sedeActual.setDireccion(sede.getDireccion());
-         sedeActual.setTelefono(sede.getTelefono());
-         sedeActual.setEmail(sede.getEmail());
+         // se agrega los nuevos datos ala sede que se trajo de la base de datos
+         // sedeActual.setNombreSede(sede.getNombreSede());
+         // sedeActual.setDireccion(sede.getDireccion());
+         // sedeActual.setTelefono(sede.getTelefono());
+         // sedeActual.setEmail(sede.getEmail());
          // metodo para guardar en la base datos
-         sedeUpdate = sedeService.save(sedeActual);
+         //sedeUpdate = sedeService.save(sedeActual);
 
+         sedeUpdate = sedeService.updaSede(sede,id);
+
+         // validacion para saber si encontro la sede en la base de datos
+        
+           if (sedeUpdate == null) {
+
+            response.put("mensaje", "El cliente ID:".concat(id.toString().concat(" - no existe en la base de datosQ")));
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+         }
       } catch (DataAccessException e) {
          // TODO: handle exception
-         //manejo de exception de la base de datos
+         // manejo de exception de la base de datos
 
          response.put("mensaje", "Error al realizar la actualizacion en la base de datos");
          response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -149,14 +150,13 @@ public class SedeRestController {
       }
 
       response.put("mensaje", "El cliente ha sido actualizado con exito!");
-      response.put("cliente", sedeUpdate);
+      response.put("sede", sedeUpdate);
       return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-      
-      
-      //el metodo sava de la clase crudRespository
+
+      // el metodo sava de la clase crudRespository
       // se utiliza el mismo metodo que en
-                                                                                   // el crear para actualizar esto por
-                                                                                   // detra
+      // el crear para actualizar esto por
+      // detra
       // se entiendo como merger , si el metodo trae un id este lo actuliza de lo
       // contraio crear el objeto en la base de datos
    }
@@ -172,7 +172,7 @@ public class SedeRestController {
       }
 
       try {
-         //metodo para eleminar una sede de la base de datos
+         // metodo para eleminar una sede de la base de datos
          sedeService.delete(id);
       } catch (EmptyResultDataAccessException e) {
          response.put("mensaje", "La sede con el ID " + id + " no existe");

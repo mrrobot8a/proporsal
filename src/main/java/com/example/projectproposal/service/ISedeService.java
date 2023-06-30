@@ -12,6 +12,8 @@ public interface ISedeService {
     public Sede findById(Long id);
     //metodo para guardar 
     public Sede save(Sede sede);
+    //metodo para actualizar
+    public Sede updaSede(Sede sede , Long id);
     //metodo para borrar
     public void delete(Long id);
 

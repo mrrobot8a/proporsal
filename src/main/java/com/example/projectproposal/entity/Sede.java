@@ -32,37 +32,39 @@ import lombok.NoArgsConstructor;
 
  public class Sede implements Serializable{
     private static final long serialVersionUID = 1L;
-   
-    private final String messageE = "No puede estar vacio";
+    
+    
+  
 
     @Id//anotacion para declar lleve primaria 
     @GeneratedValue(strategy = GenerationType.IDENTITY) //anotacion para generar un auto incrementable para este caso un id
     private Long id ;
 
 
-    @NotEmpty(message= "No puede estar vacio")
-    @Size(min = 4 ,  max = 12)
+    @NotEmpty(message= "No puede estar vacio") // 'message' mesanje custom para erorres 
+    @Size(min = 4 ,  max = 20)
     @Column(name = "nombre_Sede", nullable = false, length = 20)
     private String nombreSede ;
     
-    @NotEmpty
+    @NotEmpty(message= "No puede estar vacio")
     @Column(name = "direccion", nullable = false, length = 20)
     private String direccion;
     
-    @NotEmpty
+    @NotEmpty(message= "No puede estar vacio")
     @Column(name = "telefono", nullable = false, length = 20)
     private String telefono ;
      
-    @Email
-    @Column(name = "email", nullable = false, length = 20 , unique = true)
+    @Email(message="El formato del correo no es correcto")
+    @NotEmpty(message= "No puede estar vacio")
+    @Column(name = "email", nullable = false, length = 50 , unique = true)
     private String email ;
      
      
-    @Column(name="create_at")
-	@Temporal(TemporalType.DATE)
+    @Column(name="create_at")//nombre de la columna en la base de datos
+	@Temporal(TemporalType.DATE)// el formato de fecha 
 	private Date createAt;
      
-    @PrePersist
+    @PrePersist // anotacion para ejecutar una funcion antes de guardad en la base dato o antes que se ejecute la consulta en la base de datos
     public void prePersist(){
         createAt = new Date();
     }
