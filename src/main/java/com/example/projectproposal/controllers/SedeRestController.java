@@ -65,6 +65,31 @@ public class SedeRestController {
 
    }
 
+   @GetMapping("/sede/{nombreSede}")
+   public ResponseEntity<?> buscarPorNombre(@PathVariable("nombreSede") String nombreSede) {
+
+      List<Sede> sedes;
+      Map<String, Object> response = new HashMap<>(); // instancia de hashmap
+
+      try {
+         sedes = sedeService.findByNombreSedes(nombreSede); // consutar el objeto en la base de datos
+         // si no se encuentra el objecto que se busca en la base de datos
+         if (sedes == null) {
+            response.put("mensaje", "El cliente ID:".concat(nombreSede.concat(" - no existe en la base de datosQ")));
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+         }
+
+         return new ResponseEntity<List<Sede>>(sedes, HttpStatus.OK);
+
+      } catch (DataAccessException e) {
+         // TODO: handle exception
+         response.put("mensaje", "Error al realizar la consulta en la base de datos");
+         response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+   }
+
    @PostMapping("/sedes") // crea el endpoint
    public ResponseEntity<?> create(@Valid @RequestBody Sede sede, BindingResult result) {
 
@@ -129,13 +154,13 @@ public class SedeRestController {
          // sedeActual.setTelefono(sede.getTelefono());
          // sedeActual.setEmail(sede.getEmail());
          // metodo para guardar en la base datos
-         //sedeUpdate = sedeService.save(sedeActual);
+         // sedeUpdate = sedeService.save(sedeActual);
 
-         sedeUpdate = sedeService.updaSede(sede,id);
+         sedeUpdate = sedeService.updaSede(sede, id);
 
          // validacion para saber si encontro la sede en la base de datos
-        
-           if (sedeUpdate == null) {
+
+         if (sedeUpdate == null) {
 
             response.put("mensaje", "El cliente ID:".concat(id.toString().concat(" - no existe en la base de datosQ")));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);

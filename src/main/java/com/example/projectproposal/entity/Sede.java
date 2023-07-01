@@ -24,8 +24,8 @@ import lombok.NoArgsConstructor;
 
 
 
-@AllArgsConstructor
-@NoArgsConstructor
+// @AllArgsConstructor
+// @NoArgsConstructor
 @Entity // anotacion entity para declarar  una clase como entidad o objeto
 @Table(name= "sedes") // anotacion Table para declarar el nombre de la tabla en la base datos (para diferencia el nombre de la tabla ala clase o artributo en ella)
 @Data // nos declara los metodos getter , setter , hashcode , toString
@@ -43,7 +43,7 @@ import lombok.NoArgsConstructor;
 
     @NotEmpty(message= "No puede estar vacio") // 'message' mesanje custom para erorres 
     @Size(min = 4 ,  max = 20)
-    @Column(name = "nombre_Sede", nullable = false, length = 20)
+    @Column(name = "nombre_sede", nullable = false, length = 20)
     private String nombreSede ;
     
     @NotEmpty(message= "No puede estar vacio")

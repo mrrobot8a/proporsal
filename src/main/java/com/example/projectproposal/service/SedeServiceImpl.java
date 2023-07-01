@@ -18,7 +18,7 @@ public class SedeServiceImpl implements ISedeService {
 
     @Override
     @Transactional(readOnly = true) // está anotado con @Transactional(readOnly = true), lo que indica que la
-                                    // transacción es de solo lectura.
+                                   // transacción es de solo lectura.
     public List<Sede> findAll() {
         return (List<Sede>) SedeDao.findAll();
     }
@@ -44,6 +44,7 @@ public class SedeServiceImpl implements ISedeService {
     }
 
     @Override
+    @Transactional
     public Sede updaSede(Sede sede , Long id) {
 
         Sede sedeActual = findById(id); // se realiza la consulta para encontrar la sede
@@ -67,5 +68,15 @@ public class SedeServiceImpl implements ISedeService {
        
 
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Sede> findByNombreSedes(String name) {
+        return SedeDao.findByNombreSede(name);
+
+    }
+
+
+    
 
 }

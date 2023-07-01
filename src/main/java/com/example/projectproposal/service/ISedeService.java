@@ -16,6 +16,8 @@ public interface ISedeService {
     public Sede updaSede(Sede sede , Long id);
     //metodo para borrar
     public void delete(Long id);
+    //
+    public List<Sede> findByNombreSedes(String name);
 
 
 }
