@@ -1,16 +1,12 @@
 package com.example.projectproposal.Controllers;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,32 +16,39 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.projectproposal.Entity.Facultad;
-import com.example.projectproposal.Service.IFacultadService;
+import com.example.projectproposal.Entity.Sede;
+import com.example.projectproposal.Service.ISedeService;
 
 import jakarta.validation.Valid;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@CrossOrigin({ "http://localhost:4200" }) // cors origin perimitir concectar dos herrramientas en diferentes dominios ,
+                                          // en este caso el frontend con el backend
 @RestController
 @RequestMapping("/proposal")
-public class FacultadRestController {
-    
-  @Autowired
-  private IFacultadService  facultadService;
+public class SedeRestController {
 
-  
-  @GetMapping("/facultades")
-   public List<Facultad> index() {
-      return facultadService.findAll();
+   @Autowired // va a buscar el primer candidato , una clase concreta que implementación esta
+              // interface y la va a inyectar la cual es sedeserviceimpl
+   private ISedeService sedeService;
+
+   @GetMapping("/sedes")
+   public List<Sede> index() {
+      return sedeService.findAll();
    }
 
-   @GetMapping("/findByIdFacultad/{id}")
+   @GetMapping("/findByIdSede/{id}")
    public ResponseEntity<?> GetById(@PathVariable("id") Long id) {
 
-      Facultad facultad = null;
+      Sede sede = null;
       Map<String, Object> response = new HashMap<>(); // instancia de hashmap
 
       try {
-         facultad = facultadService.findById(id); // consutar el objeto en la base de datos
+         sede = sedeService.findById(id); // consutar el objeto en la base de datos
       } catch (DataAccessException e) {
          // TODO: handle exception
          response.put("mensaje", "Error al realizar la consulta en la base de datos");
@@ -53,19 +56,44 @@ public class FacultadRestController {
          return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
       }
       // si no se encuentra el objecto que se busca en la base de datos
-      if (facultad == null) {
+      if (sede == null) {
          response.put("mensaje", "El cliente ID:".concat(id.toString().concat(" - no existe en la base de datosQ")));
          return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
       }
 
-      return new ResponseEntity<Facultad>(facultad, HttpStatus.OK);
+      return new ResponseEntity<Sede>(sede, HttpStatus.OK);
 
    }
-  
-   @PostMapping("/createfacultad") // crea el endpoint
-   public ResponseEntity<?> create(@Valid @RequestBody Facultad Facultad, BindingResult result) {
 
-      Facultad FacultadNew = null;
+   @GetMapping("/findByNameSede/{nombreSede}")
+   public ResponseEntity<?> buscarPorNombre(@PathVariable("nombreSede") String nombreSede) {
+
+      List<Sede> sedes;
+      Map<String, Object> response = new HashMap<>(); // instancia de hashmap
+
+      try {
+         sedes = sedeService.findByNombreSedes(nombreSede); // consutar el objeto en la base de datos
+         // si no se encuentra el objecto que se busca en la base de datos
+         if (sedes == null) {
+            response.put("mensaje", "El cliente ID:".concat(nombreSede.concat(" - no existe en la base de datosQ")));
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+         }
+
+         return new ResponseEntity<List<Sede>>(sedes, HttpStatus.OK);
+
+      } catch (DataAccessException e) {
+         // TODO: handle exception
+         response.put("mensaje", "Error al realizar la consulta en la base de datos");
+         response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+   }
+
+   @PostMapping("/createSede") // crea el endpoint
+   public ResponseEntity<?> create(@Valid @RequestBody Sede sede, BindingResult result) {
+
+      Sede sedeNew = null;
       Map<String, Object> response = new HashMap<>(); // instancia de hashmap para crear un map para el manejo de
                                                       // errores
 
@@ -82,7 +110,7 @@ public class FacultadRestController {
       }
       // manejo de errorees en la consulta en la base de datos
       try {
-         FacultadNew = facultadService.save(Facultad);// metodo para guardar en la base datos
+         sedeNew = sedeService.save(sede);// metodo para guardar en la base datos
       } catch (DataAccessException e) {
          // TODO: handle exception
          response.put("mensaje", "Error al realizar la insersion en la base de datos");
@@ -91,44 +119,17 @@ public class FacultadRestController {
       }
       //
       response.put("mensaje", "El cliente ha sido creado con exito!");
-      response.put("cliente", FacultadNew);
+      response.put("cliente", sedeNew);
 
       return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
    }
 
-   @GetMapping("/findByNameFacultades/{nombreFacultad}")
-   public ResponseEntity<?> buscarPorNombre(@PathVariable("nombreFacultad") String nombreFacultad) {
+   @PutMapping("/updateSede/{id}")
+   public ResponseEntity<?> update(@PathVariable("id") Long id, @Valid @RequestBody Sede sede, BindingResult result) {
+      // Sede sedeActual = sedeService.findById(id); // se realiza la consulta para
+      // encontrar la sede que esta en la base de datos
 
-      List<Facultad> Facultads;
-      Map<String, Object> response = new HashMap<>(); // instancia de hashmap
-
-      try {
-         Facultads = facultadService.findByNombreFacultades(nombreFacultad); // consutar el objeto en la base de datos
-         // si no se encuentra el objecto que se busca en la base de datos
-         if (Facultads == null) {
-            response.put("mensaje", "El cliente ID:".concat(nombreFacultad.concat(" - no existe en la base de datosQ")));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
-         }
-
-         return new ResponseEntity<List<Facultad>>(Facultads, HttpStatus.OK);
-
-      } catch (DataAccessException e) {
-         // TODO: handle exception
-         response.put("mensaje", "Error al realizar la consulta en la base de datos");
-         response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-
-   }
-
-   
-
-   @PutMapping("/updateFacultad/{id}")
-   public ResponseEntity<?> update(@PathVariable("id") Long id, @Valid @RequestBody Facultad facultad, BindingResult result) {
-      // Facultad FacultadActual = FacultadService.findById(id); // se realiza la consulta para
-      // encontrar la Facultad que esta en la base de datos
-
-      Facultad FacultadUpdate = null;
+      Sede sedeUpdate = null;
 
       Map<String, Object> response = new HashMap<>(); // instancia de hashmap para crear un map para el manejo de
                                                       // errores
@@ -147,19 +148,19 @@ public class FacultadRestController {
       }
 
       try {
-         // se agrega los nuevos datos ala Facultad que se trajo de la base de datos
-         // FacultadActual.setNombreFacultad(Facultad.getNombreFacultad());
-         // FacultadActual.setDireccion(Facultad.getDireccion());
-         // FacultadActual.setTelefono(Facultad.getTelefono());
-         // FacultadActual.setEmail(Facultad.getEmail());
+         // se agrega los nuevos datos ala sede que se trajo de la base de datos
+         // sedeActual.setNombreSede(sede.getNombreSede());
+         // sedeActual.setDireccion(sede.getDireccion());
+         // sedeActual.setTelefono(sede.getTelefono());
+         // sedeActual.setEmail(sede.getEmail());
          // metodo para guardar en la base datos
-         // FacultadUpdate = FacultadService.save(FacultadActual);
+         // sedeUpdate = sedeService.save(sedeActual);
 
-         FacultadUpdate = facultadService.updateFacultad(facultad, id);
+         sedeUpdate = sedeService.updaSede(sede, id);
 
-         // validacion para saber si encontro la Facultad en la base de datos
+         // validacion para saber si encontro la sede en la base de datos
 
-         if (FacultadUpdate == null) {
+         if (sedeUpdate == null) {
 
             response.put("mensaje", "El cliente ID:".concat(id.toString().concat(" - no existe en la base de datosQ")));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -174,7 +175,7 @@ public class FacultadRestController {
       }
 
       response.put("mensaje", "El cliente ha sido actualizado con exito!");
-      response.put("Facultad", FacultadUpdate);
+      response.put("sede", sedeUpdate);
       return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 
       // el metodo sava de la clase crudRespository
@@ -185,21 +186,21 @@ public class FacultadRestController {
       // contraio crear el objeto en la base de datos
    }
 
-   @DeleteMapping("/deteleFacultad/{id}")
+   @DeleteMapping("/deleteSede/{id}")
    public ResponseEntity<?> delete(@PathVariable Long id) {
-      Facultad FacultadActual = facultadService.findById(id);
+      Sede sedeActual = sedeService.findById(id);
       Map<String, Object> response = new HashMap<>();
 
-      if (FacultadActual == null) {
+      if (sedeActual == null) {
          response.put("mensaje", "El cliente ID:".concat(id.toString().concat(" - no existe en la base de datos")));
          return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
       }
 
       try {
-         // metodo para eleminar una Facultad de la base de datos
-         facultadService.delete(id);
+         // metodo para eleminar una sede de la base de datos
+         sedeService.delete(id);
       } catch (EmptyResultDataAccessException e) {
-         response.put("mensaje", "La Facultad con el ID " + id + " no existe");
+         response.put("mensaje", "La sede con el ID " + id + " no existe");
          return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
       } catch (DataAccessException e) {
          // TODO: handle exception
@@ -211,8 +212,5 @@ public class FacultadRestController {
       response.put("mensaje", "El cliente ha sido eliminadoo con exito!");
       return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
    }
-
-
-
 
 }
