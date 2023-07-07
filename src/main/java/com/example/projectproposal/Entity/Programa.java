@@ -12,19 +12,21 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
+import lombok.NoArgsConstructor;
+import io.micrometer.common.lang.NonNull;
+import lombok.AllArgsConstructor;
+
 
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "programas_estudio")
 @Data
-@Entity // anotacion entity para declarar  una clase como entidad o objeto
 public class Programa implements Serializable {
 
     private static final long serialVersionUID = 1L;

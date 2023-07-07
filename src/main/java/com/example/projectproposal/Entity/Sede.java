@@ -26,10 +26,10 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-
+@Entity // anotacion entity para declarar  una clase como entidad o objeto
 @Table(name= "sedes") // anotacion Table para declarar el nombre de la tabla en la base datos (para diferencia el nombre de la tabla ala clase o artributo en ella)
 @Data // nos declara los metodos getter , setter , hashcode , toString
-@Entity // anotacion entity para declarar  una clase como entidad o objeto
+
  public class Sede implements Serializable{
     private static final long serialVersionUID = 1L;
     

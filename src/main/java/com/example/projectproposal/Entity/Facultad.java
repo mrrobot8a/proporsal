@@ -16,8 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -25,7 +23,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 @Table(name= "facultades")
-@Entity // anotacion entity para declarar  una clase como entidad o objeto
+@Entity
 public class Facultad implements Serializable {
 
     private static final long serialVersionUID = 1L;
